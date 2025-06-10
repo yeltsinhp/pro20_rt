@@ -2,44 +2,44 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\HasApiTokens;  // Agregar esta línea
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;  // Agregar HasApiTokens aquí
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Protección de campos
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role_id',  // Relación con la tabla roles
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    // Configurar la relación con el modelo Role
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    // Método para obtener el nombre del rol
+    public function getRoleName()
+    {
+        return $this->role ? $this->role->name : null;
+    }
+
+    // Comprobar si el usuario tiene un permiso
+    public function hasPermission($permissionName)
+    {
+        return $this->role->permissions->contains('name', $permissionName);
+    }
+
+    // Establecer un acceso para el password
     protected $hidden = [
         'password',
         'remember_token',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 }

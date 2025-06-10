@@ -8,18 +8,17 @@ Este es el backend de una aplicación construida con **Laravel** que maneja la *
 - Laravel 10
 - MySQL o cualquier otra base de datos compatible con Laravel
 - Composer
-- Node.js y npm (si se utiliza Vue.js o algún otro framework frontend)
 
 ## Instalación
 
 1. Clona este repositorio:
     ```bash
-    git clone https://github.com/tu-usuario/tu-repositorio.git
+    git clone https://github.com/yeltsinhp/pro20_rt.git
     ```
 
 2. Navega al directorio del proyecto:
     ```bash
-    cd tu-repositorio
+    cd pro20_rt
     ```
 
 3. Instala las dependencias de PHP:
@@ -32,12 +31,7 @@ Este es el backend de una aplicación construida con **Laravel** que maneja la *
     cp .env.example .env
     ```
 
-5. Genera la clave de la aplicación:
-    ```bash
-    php artisan key:generate
-    ```
-
-6. Configura tu base de datos en el archivo `.env`:
+5. Configura tu base de datos en el archivo `.env`:
     ```env
     DB_CONNECTION=mysql
     DB_HOST=127.0.0.1
@@ -47,20 +41,21 @@ Este es el backend de una aplicación construida con **Laravel** que maneja la *
     DB_PASSWORD=tu_contraseña
     ```
 
-7. Ejecuta las migraciones:
+6. **Si las migraciones no funcionan correctamente, puedes ejecutarlas una por una.**
+
+    Para ejecutar las migraciones una por una, usa los siguientes comandos para cada migración:
     ```bash
-    php artisan migrate
+    php artisan migrate --path=/database/migrations/2025_06_10_050712_create_roles_table.php
+    php artisan migrate --path=/database/migrations/2025_06_10_050713_create_permissions_table.php
+    php artisan migrate --path=/database/migrations/2025_06_10_050714_create_role_permission_table.php
     ```
 
-8. Publica los archivos de configuración de **Sanctum** (si aún no lo has hecho):
-    ```bash
-    php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-    ```
-
-9. Inicia el servidor de desarrollo de Laravel:
+7. Inicia el servidor de desarrollo de Laravel:
     ```bash
     php artisan serve
     ```
+
+---
 
 ## Endpoints
 

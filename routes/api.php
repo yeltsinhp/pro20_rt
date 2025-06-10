@@ -10,7 +10,10 @@ Route::post('register', [AuthController::class, 'register']);
 // Login de usuario
 Route::post('login', [AuthController::class, 'login']);
 
+Route::get('roles', [AuthController::class, 'getRole']);
+
 // Logout de usuario
 Route::middleware('auth:sanctum')->post('logout', [AuthController::class, 'logout']);
 
 Route::middleware('auth:sanctum')->get('/user/permissions', [AuthController::class, 'getPermissions']);
+

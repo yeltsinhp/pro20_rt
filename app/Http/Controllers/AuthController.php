@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
@@ -21,11 +22,18 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|exists:roles,name', // Validación de rol
+            'role_id' => 'required|integer|exists:roles,id', // Validación del rol por ID
         ]);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
+        }
+
+        // Obtener el rol por ID
+        $role = Role::find($request->role_id); // Buscar el rol por ID
+
+        if (!$role) {
+            return response()->json(['error' => 'Rol no válido'], 400);
         }
 
         // Crear un nuevo usuario
@@ -33,7 +41,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => Role::where('name', $request->role)->first()->id, // Asignar el rol
+            'role_id' => $role->id, // Asignar el rol por ID
         ]);
 
         // Crear un token para el nuevo usuario
@@ -45,6 +53,7 @@ class AuthController extends Controller
             'token' => $token,
         ], 201);
     }
+
 
     // Login de usuario
     public function login(Request $request)
@@ -63,14 +72,14 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
 
-            // Verifica si el usuario existe y crea el token
-            $token = $user->createToken('UserApp')->plainTextToken; // Esto debería funcionar si todo está bien configurado
+            // Iniciar sesión y crear la cookie
+            $token = $user->createToken('UserApp')->plainTextToken;
 
-            // Retornar la respuesta con el token
+            // Almacenar el token en una cookie (esto es para asegurar que se pueda usar en el frontend)
             return response()->json([
                 'user' => $user,
                 'token' => $token,
-            ], 200);
+            ]);
         }
 
         // Si no son válidas las credenciales
@@ -84,6 +93,8 @@ class AuthController extends Controller
         // Revocar el token actual
         $request->user()->currentAccessToken()->delete();
 
+        // Eliminar la cookie de sesión
+        Cookie::queue(Cookie::forget('role')); // Esto eliminará la cookie
         return response()->json(['message' => 'Sesión cerrada correctamente'], 200);
     }
 
@@ -106,6 +117,13 @@ class AuthController extends Controller
             ],
             'permissions' => $permissions->pluck('name'), // Solo devolver los nombres de los permisos
         ], 200);
+    }
+
+    public function getRole()
+    {
+        $roles = Role::with('permissions')->get(); // Obtener todos los roles con sus permisos
+
+        return response()->json($roles); // Devolver los roles y permisos en formato JSON
     }
 
 
